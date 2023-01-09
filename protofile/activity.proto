@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package protofile;
+option go_package ="/protofile";
+
+message User{
+    string name =1;
+    string email =2;
+    int64 phone =3;
+    
+}
+
+message UserRequest{
+    User user=1; 
+}
+
+message UserResponse{
+    string Result=1;
+}
+
+service UserService{
+    rpc UserData(UserRequest) returns (UserResponse){};
+}
+
