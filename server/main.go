@@ -79,7 +79,7 @@ var collection *mongo.Collection
 
 func main() {
 	// godotenv.Load(".env")
-
+	fmt.Println("GRPC Server Started...")
 	opts := []grpc.ServerOption{}
 	s := grpc.NewServer(opts...)
 
