@@ -47,6 +47,30 @@ func ActData(c protofile.UserServiceClient, email string, at string, duration in
 	handleError(err)
 	fmt.Println(res)
 }
+func GetUser(c protofile.UserServiceClient, email string) {
+	getUserRequest := protofile.GetUserRequest{
+		Email: email,
+	}
+	res, err := c.GetUser(context.Background(), &getUserRequest)
+	handleError(err)
+	fmt.Println(res)
+}
+func GetActivity(c protofile.UserServiceClient, email string) {
+	getActivityRequest := protofile.GetActivityRequest{
+		Email: email,
+	}
+	res, err := c.GetActivity(context.Background(), &getActivityRequest)
+	handleError(err)
+	fmt.Println(res)
+}
+func RemoveUser(c protofile.UserServiceClient, email string) {
+	removeUserRequest := protofile.RemoveUserRequest{
+		Email: email,
+	}
+	res, err := c.RemoveUser(context.Background(), &removeUserRequest)
+	handleError(err)
+	fmt.Println(res)
+}
 
 // func main1() {
 // 	fmt.Println("client")
