@@ -118,6 +118,84 @@ func (*server) ActData(ctx context.Context, req *protofile.ActRequest) (*protofi
 var U_collection *mongo.Collection
 var A_collection *mongo.Collection
 
+func (*server) GetActivity(ctx context.Context, req *protofile.GetActivityRequest) (*protofile.GetActivityResponse, error) {
+	fmt.Println(req)
+	email := req.GetEmail()
+	filter := bson.M{
+		"email": email,
+	}
+	var result_data []activity_item
+	cursor, err := A_collection.Find(context.TODO(), filter)
+	handleError(err)
+	cursor.All(context.Background(), &result_data)
+	if len(result_data) == 0 {
+		getActivityResponse := protofile.GetActivityResponse{
+			Status:   false,
+			Activity: nil,
+		}
+		return &getActivityResponse, nil
+	} else {
+		getActivityResponse := protofile.GetActivityResponse{
+			Status: true,
+			Activity: &protofile.Activity{
+				Activitytype: result_data[0].Activitytype,
+				Timestamp:    result_data[0].Timestamp,
+				Duration:     result_data[0].Duration,
+				Label:        result_data[0].Label,
+				Email:        result_data[0].Email,
+			},
+		}
+		return &getActivityResponse, nil
+	}
+}
+func (*server) GetUser(ctx context.Context, req *protofile.GetUserRequest) (*protofile.GetUserResponse, error) {
+	fmt.Println(req)
+	email := req.GetEmail()
+	filter := bson.M{
+		"email": email,
+	}
+	var result_data []user_item
+	cursor, err := U_collection.Find(context.TODO(), filter)
+	handleError(err)
+	cursor.All(context.Background(), &result_data)
+	if len(result_data) == 0 {
+		getUserResponse := protofile.GetUserResponse{
+			Status: false,
+			User:   nil,
+		}
+		return &getUserResponse, nil
+	} else {
+		getUserResponse := protofile.GetUserResponse{
+			Status: true,
+			User: &protofile.User{
+				Email: result_data[0].Email,
+				Name:  result_data[0].Name,
+				Phone: result_data[0].Phone,
+			},
+		}
+		return &getUserResponse, nil
+	}
+}
+func (*server) RemoveUser(ctx context.Context, req *protofile.RemoveUserRequest) (*protofile.RemoveUserResponse, error) {
+	fmt.Println(req)
+	email := req.GetEmail()
+	filter := bson.M{
+		"email": email,
+	}
+	A_collection.DeleteMany(context.TODO(), filter)
+	u_r, err := U_collection.DeleteOne(context.TODO(), filter)
+	handleError(err)
+	var result string
+	if u_r.DeletedCount == 0 {
+		result = "User does not exist"
+	} else {
+		result = "User deleted successfully"
+	}
+	removeUserResponse := protofile.RemoveUserResponse{
+		Result: result,
+	}
+	return &removeUserResponse, nil
+}
 func main() {
 	godotenv.Load(".env")
 	fmt.Println("GRPC Server Started...")

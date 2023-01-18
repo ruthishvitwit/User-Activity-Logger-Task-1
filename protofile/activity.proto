@@ -32,8 +32,35 @@ message ActResponse{
     string Result=1;
 }
 
+message GetUserRequest {
+    string email = 1;
+}
+
+message GetUserResponse {
+    bool status = 1;
+    User user = 2;
+}
+
+message GetActivityRequest {
+    string email = 1;
+}
+
+message GetActivityResponse {
+    bool status = 1;
+    Activity activity = 2;
+}
+message RemoveUserRequest {
+    string email = 1;
+}
+
+message RemoveUserResponse {
+    string result = 1;
+}
 service UserService{
     rpc UserData(UserRequest) returns (UserResponse){};
     rpc ActData(ActRequest) returns (ActResponse) {};
+    rpc GetUser(GetUserRequest) returns (GetUserResponse) {};
+    rpc GetActivity(GetActivityRequest) returns (GetActivityResponse) {};
+    rpc RemoveUser(RemoveUserRequest) returns (RemoveUserResponse) {};
 }
 
