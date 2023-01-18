@@ -9,6 +9,13 @@ message User{
     int64 phone =3;
     
 }
+message Activity {
+    string activitytype = 1;
+    string timestamp = 2;
+    int32 duration = 3;
+    string label = 4;
+    string email = 5;
+}
 
 message UserRequest{
     User user=1; 
@@ -17,8 +24,16 @@ message UserRequest{
 message UserResponse{
     string Result=1;
 }
+message ActRequest{
+    Activity activity=1; 
+}
+
+message ActResponse{
+    string Result=1;
+}
 
 service UserService{
     rpc UserData(UserRequest) returns (UserResponse){};
+    rpc ActData(ActRequest) returns (ActResponse) {};
 }
 

@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	UserData(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	ActData(ctx context.Context, in *ActRequest, opts ...grpc.CallOption) (*ActResponse, error)
 }
 
 type userServiceClient struct {
@@ -42,11 +43,21 @@ func (c *userServiceClient) UserData(ctx context.Context, in *UserRequest, opts 
 	return out, nil
 }
 
+func (c *userServiceClient) ActData(ctx context.Context, in *ActRequest, opts ...grpc.CallOption) (*ActResponse, error) {
+	out := new(ActResponse)
+	err := c.cc.Invoke(ctx, "/protofile.UserService/ActData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	UserData(context.Context, *UserRequest) (*UserResponse, error)
+	ActData(context.Context, *ActRequest) (*ActResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedUserServiceServer struct {
 
 func (UnimplementedUserServiceServer) UserData(context.Context, *UserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserData not implemented")
+}
+func (UnimplementedUserServiceServer) ActData(context.Context, *ActRequest) (*ActResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ActData not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -88,6 +102,24 @@ func _UserService_UserData_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_ActData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ActData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protofile.UserService/ActData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ActData(ctx, req.(*ActRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserData",
 			Handler:    _UserService_UserData_Handler,
+		},
+		{
+			MethodName: "ActData",
+			Handler:    _UserService_ActData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
