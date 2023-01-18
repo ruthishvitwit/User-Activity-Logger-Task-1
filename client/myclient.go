@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"main/protofile"
+	"time"
 )
 
 func handleError(err error) {
@@ -21,6 +22,28 @@ func UserData(c protofile.UserServiceClient, name string, email string, phone in
 		},
 	}
 	res, err := c.UserData(context.Background(), &UserRequest)
+	handleError(err)
+	fmt.Println(res)
+}
+func getTimeStamp() string {
+	t := time.Now()
+	ts := t.Format("01-02-2006 15:04:05 Monday")
+	return ts
+}
+func ActData(c protofile.UserServiceClient, email string, at string, duration int32, label string) {
+	t := time.Now()
+	ts := t.Format("01-02-2006 15:04:05 Monday")
+	activityAddRequest := protofile.ActRequest{
+		Activity: &protofile.Activity{
+			Activitytype: at,
+			Timestamp:    ts,
+			Duration:     duration,
+			Label:        label,
+			Email:        email,
+		},
+	}
+
+	res, err := c.ActData(context.Background(), &activityAddRequest)
 	handleError(err)
 	fmt.Println(res)
 }
