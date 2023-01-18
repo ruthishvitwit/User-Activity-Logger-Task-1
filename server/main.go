@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 
-	// "github.com/joho/godotenv"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,6 +23,14 @@ type user_item struct {
 	Email string             `bson:"email"`
 	Phone int64              `bson:"phone"`
 }
+type activity_item struct {
+	Id           primitive.ObjectID `bson:"_id,omitempty"`
+	Activitytype string             `bson:"activitytype"`
+	Duration     int32              `bson:"duration"`
+	Label        string             `bson:"label"`
+	Timestamp    string             `bson:"timestamp"`
+	Email        string             `bson:"email"`
+}
 
 func pushUserToDb(ctx context.Context, item user_item) string {
 	email := item.Email
@@ -32,7 +39,7 @@ func pushUserToDb(ctx context.Context, item user_item) string {
 	}
 
 	var result_data []user_item
-	cursor, err := collection.Find(context.TODO(), filter)
+	cursor, err := U_collection.Find(context.TODO(), filter)
 	handleError(err)
 
 	cursor.All(context.Background(), &result_data)
@@ -42,8 +49,13 @@ func pushUserToDb(ctx context.Context, item user_item) string {
 		return result
 	}
 
-	collection.InsertOne(ctx, item)
+	U_collection.InsertOne(ctx, item)
 	result := "User created"
+	return result
+}
+func pushActToDb(ctx context.Context, item activity_item) string {
+	A_collection.InsertOne(ctx, item)
+	result := "User activity added"
 	return result
 }
 func handleError(err error) {
@@ -56,6 +68,11 @@ type server struct {
 	protofile.UnimplementedUserServiceServer
 }
 
+func goDotEnvVariable(key string) string {
+	err := godotenv.Load(".env")
+	handleError(err)
+	return os.Getenv(key)
+}
 func (*server) UserData(ctx context.Context, req *protofile.UserRequest) (*protofile.UserResponse, error) {
 	fmt.Println(req)
 	name := req.GetUser().GetName()
@@ -75,13 +92,31 @@ func (*server) UserData(ctx context.Context, req *protofile.UserRequest) (*proto
 	}
 	return &userAddResponse, nil
 }
-func goDotEnvVariable(key string) string {
-	err := godotenv.Load(".env")
-	handleError(err)
-	return os.Getenv(key)
+func (*server) ActData(ctx context.Context, req *protofile.ActRequest) (*protofile.ActResponse, error) {
+	fmt.Println(req)
+	activitytype := req.GetActivity().GetActivitytype()
+	duration := req.GetActivity().GetDuration()
+	label := req.GetActivity().GetLabel()
+	timestamp := req.GetActivity().GetTimestamp()
+	email := req.GetActivity().GetEmail()
+	newActItem := activity_item{
+		Activitytype: activitytype,
+		Duration:     duration,
+		Label:        label,
+		Timestamp:    timestamp,
+		Email:        email,
+	}
+	dbres := pushActToDb(ctx, newActItem)
+	result := fmt.Sprintf("%v", dbres)
+	actAddResponse := protofile.ActResponse{
+		Result: result,
+	}
+	return &actAddResponse, nil
+
 }
 
-var collection *mongo.Collection
+var U_collection *mongo.Collection
+var A_collection *mongo.Collection
 
 func main() {
 	godotenv.Load(".env")
@@ -109,8 +144,8 @@ func main() {
 	err = client.Connect(context.TODO())
 	handleError(err)
 
-	collection = client.Database("useractivity").Collection("userdata")
-	// collection = client.Database("useractivity").Collection("useractivitydata")
+	U_collection = client.Database("useractivity").Collection("userdata")
+	A_collection = client.Database("useractivity").Collection("useractivitydata")
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
