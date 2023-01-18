@@ -10,6 +10,7 @@ import (
 	"os/signal"
 
 	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -74,11 +75,16 @@ func (*server) UserData(ctx context.Context, req *protofile.UserRequest) (*proto
 	}
 	return &userAddResponse, nil
 }
+func goDotEnvVariable(key string) string {
+	err := godotenv.Load(".env")
+	handleError(err)
+	return os.Getenv(key)
+}
 
 var collection *mongo.Collection
 
 func main() {
-	// godotenv.Load(".env")
+	godotenv.Load(".env")
 	fmt.Println("GRPC Server Started...")
 	opts := []grpc.ServerOption{}
 	s := grpc.NewServer(opts...)
@@ -94,8 +100,8 @@ func main() {
 		}
 	}()
 
-	// mongo_uri := goDotEnvVariable("MONGODB_URI")
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://rutish2722:rutish2722@cluster0.5mkby27.mongodb.net/?retryWrites=true&w=majority"))
+	mongo_uri := goDotEnvVariable("MONGOURL")
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongo_uri))
 	handleError(err)
 
 	fmt.Println("MongoDB Connected")
