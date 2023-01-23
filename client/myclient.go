@@ -13,7 +13,7 @@ func handleError(err error) {
 		log.Fatal(err)
 	}
 }
-func UserData(c protofile.UserServiceClient, name string, email string, phone int64) {
+func UserData(c protofile.UserServiceClient, name string, email string, phone int64) string {
 	UserRequest := protofile.UserRequest{
 		User: &protofile.User{
 			Name:  name,
@@ -24,13 +24,14 @@ func UserData(c protofile.UserServiceClient, name string, email string, phone in
 	res, err := c.UserData(context.Background(), &UserRequest)
 	handleError(err)
 	fmt.Println(res)
+	return res.Result
 }
 func getTimeStamp() string {
 	t := time.Now()
 	ts := t.Format("01-02-2006 15:04:05 Monday")
 	return ts
 }
-func ActData(c protofile.UserServiceClient, email string, at string, duration int32, label string) {
+func ActData(c protofile.UserServiceClient, email string, at string, duration int32, label string) string {
 	t := time.Now()
 	ts := t.Format("01-02-2006 15:04:05 Monday")
 	activityAddRequest := protofile.ActRequest{
@@ -46,30 +47,34 @@ func ActData(c protofile.UserServiceClient, email string, at string, duration in
 	res, err := c.ActData(context.Background(), &activityAddRequest)
 	handleError(err)
 	fmt.Println(res)
+	return res.Result
 }
-func GetUser(c protofile.UserServiceClient, email string) {
+func GetUser(c protofile.UserServiceClient, email string) bool {
 	getUserRequest := protofile.GetUserRequest{
 		Email: email,
 	}
 	res, err := c.GetUser(context.Background(), &getUserRequest)
 	handleError(err)
 	fmt.Println(res)
+	return res.Status
 }
-func GetActivity(c protofile.UserServiceClient, email string) {
+func GetActivity(c protofile.UserServiceClient, email string) bool {
 	getActivityRequest := protofile.GetActivityRequest{
 		Email: email,
 	}
 	res, err := c.GetActivity(context.Background(), &getActivityRequest)
 	handleError(err)
 	fmt.Println(res)
+	return res.Status
 }
-func RemoveUser(c protofile.UserServiceClient, email string) {
+func RemoveUser(c protofile.UserServiceClient, email string) string {
 	removeUserRequest := protofile.RemoveUserRequest{
 		Email: email,
 	}
 	res, err := c.RemoveUser(context.Background(), &removeUserRequest)
 	handleError(err)
 	fmt.Println(res)
+	return res.Result
 }
 
 // func main1() {
